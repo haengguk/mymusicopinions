@@ -21,7 +21,7 @@ import java.util.List;
 @RequestMapping("/api/songs")
 public class SongController {
 
-    @Autowired // 생략 가능
+    @Autowired
     private final SongService songService;
     private final ReviewService reviewService;
 
@@ -61,7 +61,6 @@ public class SongController {
 
     @GetMapping("/itunes/{itunesTrackId}")
     public ResponseEntity<Song> getSongByItunesId(@PathVariable("itunesTrackId") Long itunesTrackId) {
-        // Need method in SongService
         return songService.getSongByItunesId(itunesTrackId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -88,7 +87,7 @@ public class SongController {
             return songService.searchByGenre(genre, pageable);
         }
 
-        return songService.getSongs(pageable); // 조건이 아예 없을시
+        return songService.getSongs(pageable);
     }
 
     @GetMapping

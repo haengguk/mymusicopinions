@@ -34,31 +34,18 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        // CORS 설정 추가
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
-        // CSRF 비활성화
         http.csrf(csrf -> csrf.disable());
 
-        // 세션 미사용 (Stateless)
         http.sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        // API 접근 권한 설정
         http.authorizeHttpRequests(authz -> authz
-                // 정적 리소스 허용
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-
-                // 로그인 & 회원가입 API 허용
                 .requestMatchers("/api/auth/**").permitAll()
-
-                // 조회용 API 허용 (GET) - 게시글 목록, 노래 목록 등
                 .requestMatchers(HttpMethod.GET, "/api/board/**", "/api/songs/**", "/api/posts/**").permitAll()
-
-                // View 관련 (혹시 사용한다면) 허용
                 .requestMatchers("/view/**", "/error", "/").permitAll()
-
-                // 그 외 모든 요청은 인증 필요
                 .anyRequest().authenticated());
 
         http.addFilterBefore(new JwtAuthenticationFilter(jwtUtil, userRepository),
@@ -71,7 +58,6 @@ public class SecurityConfig {
     public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
         org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
 
-        // 모든 Vercel 도메인 및 로컬 개발 환경 허용 (와일드카드 패턴 사용)
         configuration.setAllowedOriginPatterns(Arrays.asList(
                 "https://*.vercel.app",
                 "http://localhost:3000",

@@ -22,8 +22,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAll(Exception ex) {
-        // 상세 에러 로그 기록 (실제 운영환경에서는 필수)
-        // e.g. log.error("Unexpected error", ex);
 
         ErrorResponse body = new ErrorResponse("INTERNAL_ERROR", "서버에 문제가 발생했습니다.");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);

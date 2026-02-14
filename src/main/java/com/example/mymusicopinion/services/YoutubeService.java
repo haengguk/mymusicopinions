@@ -31,11 +31,8 @@ public class YoutubeService {
 
     public String searchVideoId(String query) {
         if (apiKey == null || apiKey.isEmpty()) {
-            System.err.println("❌ [YoutubeService] API 키가 누락되었습니다!");
             return null;
         }
-
-        System.out.println("🎥 [YoutubeService] 검색 중: " + query);
 
         try {
             YoutubeSearchResponseDto response = restClient.get()
@@ -51,12 +48,10 @@ public class YoutubeService {
                     .body(YoutubeSearchResponseDto.class);
 
             if (response != null && response.getItems() != null && !response.getItems().isEmpty()) {
-                String videoId = response.getItems().get(0).getId().getVideoId();
-                System.out.println("✅ [YoutubeService] 비디오 ID 찾음: " + videoId);
-                return videoId;
+                return response.getItems().get(0).getId().getVideoId();
             }
         } catch (Exception e) {
-            System.err.println("⚠️ [YoutubeService] 검색 실패: " + e.getMessage());
+            // ignore
         }
 
         return null;

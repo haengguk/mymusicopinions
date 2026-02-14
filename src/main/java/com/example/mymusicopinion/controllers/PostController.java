@@ -21,7 +21,7 @@ import org.springframework.data.domain.Pageable;
 @RequestMapping("/api/board")
 public class PostController {
 
-    @Autowired // 생략 가능
+    @Autowired
     private final PostService postService;
     private final PostCommentService postCommentService;
 
