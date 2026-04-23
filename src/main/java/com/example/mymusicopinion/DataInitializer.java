@@ -58,20 +58,19 @@ public class DataInitializer implements CommandLineRunner {
     // @Transactional // 제거: HTTP 요청이 포함된 긴 작업이므로 트랜잭션을 쪼갭니다.
     public void processInitialization() {
         if (userRepository.count() > 0) {
-            if (userRepository.count() > 0) {
-                return;
-            }
+            return;
+        }
 
-            long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
 
-            // iTunes에서 노래 가져오기
-            List<Song> songPool = new ArrayList<>();
-            String[] artists = {
-                    "Daniel Caesar", "Oasis", "John Mayer", "Red Hot Chili Peppers", "Justin Bieber",
-                    "Ed Sheeran", "Coldplay", "BTS", "Shawn Mendes", "Stevie Ray Vaughan",
-                    "Taylor Swift", "Bruno Mars", "The Weeknd", "Post Malone", "Ariana Grande",
-                    "Drake", "Maroon 5", "Adele", "Imagine Dragons", "Dua Lipa"
-            };
+        // iTunes에서 노래 가져오기
+        List<Song> songPool = new ArrayList<>();
+        String[] artists = {
+                "Daniel Caesar", "Oasis", "John Mayer", "Red Hot Chili Peppers", "Justin Bieber",
+                "Ed Sheeran", "Coldplay", "BTS", "Shawn Mendes", "Stevie Ray Vaughan",
+                "Taylor Swift", "Bruno Mars", "The Weeknd", "Post Malone", "Ariana Grande",
+                "Drake", "Maroon 5", "Adele", "Imagine Dragons", "Dua Lipa"
+        };
 
             for (String artist : artists) {
                 try {

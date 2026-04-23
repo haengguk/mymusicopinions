@@ -30,8 +30,8 @@ import 'react-loading-skeleton/dist/skeleton.css'
 function App() {
   return (
     <AuthProvider>
-      <SkeletonTheme baseColor="#202020" highlightColor="#444444">
-        <div className="min-h-screen bg-slate-950 text-white font-sans antialiased">
+      <SkeletonTheme baseColor="#d8cec0" highlightColor="#f7f1e8">
+        <div className="min-h-screen bg-[var(--mmo-paper)] text-[var(--mmo-ink)] antialiased">
           <Navbar />
           <Routes>
             <Route path="/" element={<HomeRoute />} />

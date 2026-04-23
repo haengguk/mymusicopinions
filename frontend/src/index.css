@@ -1,24 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  body {
-    @apply bg-slate-950 text-white antialiased font-sans;
+  :root {
+    --mmo-paper: #f3ede2;
+    --mmo-paper-deep: #e6dac7;
+    --mmo-ink: #171310;
+    --mmo-muted: #6b6157;
+    --mmo-accent: #9f4332;
+    --mmo-accent-soft: #ccb3a4;
+    --mmo-rule: rgba(23, 19, 16, 0.14);
+    --mmo-shadow: rgba(23, 19, 16, 0.08);
   }
 }
 
-/* Custom Scrollbar for Vibe */
+@layer base {
+  body {
+    background:
+      radial-gradient(circle at top left, rgba(159, 67, 50, 0.12), transparent 28%),
+      radial-gradient(circle at bottom right, rgba(110, 81, 53, 0.08), transparent 24%),
+      var(--mmo-paper);
+    color: var(--mmo-ink);
+    font-family: 'Manrope', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    @apply antialiased;
+  }
+}
+
+@layer utilities {
+  .balance-keep {
+    word-break: keep-all;
+    overflow-wrap: normal;
+    text-wrap: balance;
+  }
+}
+
+.font-display {
+  font-family: 'Manrope', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+}
+
+::selection {
+  background: rgba(159, 67, 50, 0.16);
+  color: var(--mmo-ink);
+}
+
 ::-webkit-scrollbar {
   width: 8px;
 }
+
 ::-webkit-scrollbar-track {
-  background: #0f172a; 
+  background: #e2d6c5;
 }
+
 ::-webkit-scrollbar-thumb {
-  background: #334155; 
+  background: #b29f89;
   border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569; 
+  background: #917e67;
 }
