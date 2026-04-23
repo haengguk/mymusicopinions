@@ -1,10 +1,23 @@
 import { useState, useEffect } from 'react'
-import { User, Save, Lock, AlertCircle, MessageSquare, FileText, Star, Calendar } from 'lucide-react'
+import { Save, AlertCircle, MessageSquare, Star, Calendar, ArrowRight } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import api from '../api/axios'
 
+const formatDate = (dateString) =>
+    new Date(dateString).toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    })
+
+const truncate = (text, limit = 90) => {
+    if (!text) return ''
+    return text.length > limit ? `${text.slice(0, limit)}...` : text
+}
+
 export default function ProfilePage() {
     const navigate = useNavigate()
+
     const [userInfo, setUserInfo] = useState({
         username: '',
         bio: '',
@@ -12,8 +25,6 @@ export default function ProfilePage() {
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(true)
     const [message, setMessage] = useState({ type: '', text: '' })
-
-    // My Activity State
     const [activeTab, setActiveTab] = useState('reviews')
     const [myReviews, setMyReviews] = useState([])
     const [myPosts, setMyPosts] = useState([])
@@ -28,10 +39,10 @@ export default function ProfilePage() {
             const res = await api.get('/api/users/me')
             setUserInfo({
                 username: res.data.username,
-                bio: res.data.bio || ''
+                bio: res.data.bio || '',
             })
         } catch (err) {
-            console.error("Failed to fetch user info", err)
+            console.error('Failed to fetch user info', err)
         } finally {
             setLoading(false)
         }
@@ -41,12 +52,12 @@ export default function ProfilePage() {
         try {
             const [reviewsRes, postsRes] = await Promise.all([
                 api.get('/api/users/me/reviews'),
-                api.get('/api/users/me/posts')
+                api.get('/api/users/me/posts'),
             ])
             setMyReviews(reviewsRes.data)
             setMyPosts(postsRes.data)
         } catch (err) {
-            console.error("Failed to fetch activity", err)
+            console.error('Failed to fetch activity', err)
         }
     }
 
@@ -57,7 +68,7 @@ export default function ProfilePage() {
         try {
             await api.put('/api/users/me', {
                 bio: userInfo.bio,
-                password: password || undefined
+                password: password || undefined,
             })
             setMessage({ type: 'success', text: '정보가 성공적으로 수정되었습니다.' })
             setPassword('')
@@ -67,185 +78,270 @@ export default function ProfilePage() {
         }
     }
 
-    if (loading) return <div className="min-h-screen bg-[#121212] pt-24 text-center text-white">Loading...</div>
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-transparent px-6 pt-28 text-center text-[var(--mmo-muted)]">
+                마이페이지를 불러오는 중입니다.
+            </div>
+        )
+    }
 
     return (
-        <div className="min-h-screen bg-[#121212] text-white pt-32 pb-12 px-6">
-            <div className="container mx-auto max-w-4xl">
-                <h1 className="text-3xl font-bold mb-8">마이페이지</h1>
+        <div className="min-h-screen bg-transparent pb-16 pt-24 text-[var(--mmo-ink)]">
+            <div className="mx-auto max-w-7xl px-6">
+                <div className="grid gap-10 lg:grid-cols-[300px_minmax(0,1fr)] lg:gap-14">
+                    <aside className="h-fit lg:sticky lg:top-28">
+                        <p className="text-[11px] uppercase tracking-[0.32em] text-[var(--mmo-accent)]">
+                            My page
+                        </p>
+                        <h1 className="font-display balance-keep mt-4 max-w-[10ch] text-[2.8rem] font-extrabold leading-[1.02] tracking-[-0.055em] text-[var(--mmo-ink)] sm:text-[3.2rem]">
+                            {userInfo.username}
+                        </h1>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {/* Left Column: Profile Card */}
-                    <div className="md:col-span-1 h-fit sticky top-32">
-                        <div className="bg-[#181818] p-8 rounded-2xl border border-white/5 text-center">
-                            <div className="w-32 h-32 mx-auto bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center mb-6 shadow-2xl">
-                                <span className="text-4xl font-bold">{userInfo.username.charAt(0).toUpperCase()}</span>
+                        <div className="mt-8 flex h-28 w-28 items-center justify-center border border-[color:var(--mmo-rule)] bg-[var(--mmo-paper-deep)] text-4xl font-extrabold text-[var(--mmo-ink)]">
+                            {userInfo.username?.charAt(0)?.toUpperCase() || 'M'}
+                        </div>
+
+                        <div className="mt-6 space-y-4 border-t border-[color:var(--mmo-rule)] pt-5 text-sm leading-7 text-[var(--mmo-muted)]">
+                            <div>{userInfo.bio || '아직 소개글이 없습니다.'}</div>
+                        </div>
+
+                        <div className="mt-8 grid grid-cols-2 gap-4 border-t border-[color:var(--mmo-rule)] pt-5">
+                            <div>
+                                <div className="font-display text-[2.3rem] font-bold leading-none tracking-[-0.05em] text-[var(--mmo-ink)]">
+                                    {myReviews.length}
+                                </div>
+                                <div className="mt-2 text-[11px] uppercase tracking-[0.28em] text-[var(--mmo-muted)]">
+                                    Reviews
+                                </div>
                             </div>
-                            <h2 className="text-2xl font-bold mb-2">{userInfo.username}</h2>
-                            <p className="text-slate-400 text-sm mb-6">MMO 멤버</p>
-
-                            <div className="bg-white/5 rounded-xl p-4 text-left">
-                                <div className="text-xs text-slate-500 uppercase font-bold mb-1">소개</div>
-                                <p className="text-sm text-slate-300 italic">
-                                    {userInfo.bio || "아직 소개글이 없습니다."}
-                                </p>
+                            <div>
+                                <div className="font-display text-[2.3rem] font-bold leading-none tracking-[-0.05em] text-[var(--mmo-ink)]">
+                                    {myPosts.length}
+                                </div>
+                                <div className="mt-2 text-[11px] uppercase tracking-[0.28em] text-[var(--mmo-muted)]">
+                                    Posts
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </aside>
 
-                    {/* Right Column */}
-                    <div className="md:col-span-2 space-y-8">
-                        {/* Edit Form */}
-                        <div className="bg-[#181818] p-8 rounded-2xl border border-white/5">
-                            <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-                                <User className="text-indigo-500" /> 내 정보 수정
-                            </h3>
-
-                            <form onSubmit={handleUpdate} className="space-y-6">
+                    <section className="space-y-12 border-t border-[color:var(--mmo-rule)] pt-8">
+                        <section>
+                            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-400 mb-2">닉네임 (변경 불가)</label>
-                                    <input
-                                        type="text"
-                                        value={userInfo.username}
-                                        disabled
-                                        className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-slate-500 cursor-not-allowed"
-                                    />
+                                    <p className="text-[11px] uppercase tracking-[0.32em] text-[var(--mmo-accent)]">
+                                        Profile
+                                    </p>
+                                    <h2 className="font-display mt-3 text-[2.3rem] font-bold tracking-[-0.05em] text-[var(--mmo-ink)] md:text-[3rem]">
+                                        내 정보 수정
+                                    </h2>
                                 </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-400 mb-2">한 줄 소개</label>
-                                    <textarea
-                                        value={userInfo.bio}
-                                        onChange={(e) => setUserInfo({ ...userInfo, bio: e.target.value })}
-                                        className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:outline-none transition-colors h-24 resize-none"
-                                        placeholder="나를 표현하는 한 줄 소개를 입력하세요."
-                                    />
+                                <div className="text-sm leading-7 text-[var(--mmo-muted)]">
+                                    닉네임은 변경할 수 없고 소개글과 비밀번호만 수정할 수 있습니다.
                                 </div>
+                            </div>
 
-                                <div className="pt-6 border-t border-white/5">
-                                    <h4 className="text-lg font-bold mb-4 flex items-center gap-2 text-slate-200">
-                                        <Lock className="w-4 h-4" /> 비밀번호 변경
-                                    </h4>
-                                    <div className="bg-yellow-500/10 text-yellow-500 text-sm p-4 rounded-lg mb-4 flex items-start gap-2">
-                                        <AlertCircle className="w-5 h-5 shrink-0" />
-                                        <span>비밀번호를 변경하려면 아래에 새 비밀번호를 입력하세요.</span>
+                            <form onSubmit={handleUpdate} className="mt-8">
+                                <div className="border-y border-[color:var(--mmo-rule)]">
+                                    <div className="grid gap-5 border-b border-[color:var(--mmo-rule)] py-6 lg:grid-cols-[170px_minmax(0,1fr)]">
+                                        <label className="text-[11px] uppercase tracking-[0.28em] text-[var(--mmo-accent)]">
+                                            Username
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={userInfo.username}
+                                            disabled
+                                            className="w-full border-b border-[color:var(--mmo-rule)] bg-transparent px-0 py-3 text-[1.1rem] text-[var(--mmo-muted)] outline-none"
+                                        />
                                     </div>
-                                    <input
-                                        type="password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:outline-none transition-colors"
-                                        placeholder="새 비밀번호 입력"
-                                    />
+
+                                    <div className="grid gap-5 border-b border-[color:var(--mmo-rule)] py-6 lg:grid-cols-[170px_minmax(0,1fr)]">
+                                        <label className="text-[11px] uppercase tracking-[0.28em] text-[var(--mmo-accent)]">
+                                            Bio
+                                        </label>
+                                        <textarea
+                                            value={userInfo.bio}
+                                            onChange={(e) => setUserInfo({ ...userInfo, bio: e.target.value })}
+                                            className="h-28 w-full border border-[color:var(--mmo-rule)] bg-transparent px-4 py-4 text-base leading-8 text-[var(--mmo-ink)] outline-none placeholder:text-[#988d82] resize-none"
+                                            placeholder="나를 표현하는 한 줄 소개를 입력하세요."
+                                        />
+                                    </div>
+
+                                    <div className="grid gap-5 py-6 lg:grid-cols-[170px_minmax(0,1fr)]">
+                                        <div>
+                                            <div className="text-[11px] uppercase tracking-[0.28em] text-[var(--mmo-accent)]">
+                                                Password
+                                            </div>
+                                            <div className="mt-4 inline-flex items-start gap-2 text-sm leading-7 text-[var(--mmo-muted)]">
+                                                <AlertCircle className="mt-1 h-4 w-4 shrink-0" />
+                                                새 비밀번호를 입력한 경우에만 변경됩니다.
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <input
+                                                type="password"
+                                                value={password}
+                                                onChange={(e) => setPassword(e.target.value)}
+                                                className="w-full border-b border-[color:var(--mmo-rule)] bg-transparent px-0 py-3 text-[1.1rem] text-[var(--mmo-ink)] outline-none placeholder:text-[#988d82]"
+                                                placeholder="새 비밀번호 입력"
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {message.text && (
-                                    <div className={`p-4 rounded-lg text-sm font-bold ${message.type === 'success' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                                    <div
+                                        className={`mt-5 text-sm leading-7 ${
+                                            message.type === 'success'
+                                                ? 'text-[var(--mmo-accent)]'
+                                                : 'text-[#a84635]'
+                                        }`}
+                                    >
                                         {message.text}
                                     </div>
                                 )}
 
-                                <div className="flex justify-end pt-4">
+                                <div className="flex justify-end pt-8">
                                     <button
                                         type="submit"
-                                        className="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition-colors flex items-center gap-2"
+                                        className="inline-flex items-center gap-2 border-b-2 border-[var(--mmo-ink)] pb-2 text-[12px] font-semibold uppercase tracking-[0.28em] text-[var(--mmo-ink)] transition-colors hover:text-[var(--mmo-accent)]"
                                     >
-                                        <Save className="w-4 h-4" />
+                                        <Save className="h-4 w-4" />
                                         저장하기
                                     </button>
                                 </div>
                             </form>
-                        </div>
+                        </section>
 
-                        {/* My Activity Section */}
-                        <div className="bg-[#181818] p-8 rounded-2xl border border-white/5">
-                            <h3 className="text-xl font-bold mb-6">내 활동</h3>
+                        <section className="border-t border-[color:var(--mmo-rule)] pt-8">
+                            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                                <div>
+                                    <p className="text-[11px] uppercase tracking-[0.32em] text-[var(--mmo-accent)]">
+                                        Activity
+                                    </p>
+                                    <h2 className="font-display mt-3 text-[2.3rem] font-bold tracking-[-0.05em] text-[var(--mmo-ink)] md:text-[3rem]">
+                                        내 활동
+                                    </h2>
+                                </div>
 
-                            {/* Tabs */}
-                            <div className="flex border-b border-indigo-500/20 mb-6">
-                                <button
-                                    onClick={() => setActiveTab('reviews')}
-                                    className={`px-6 py-3 text-sm font-bold flex items-center gap-2 transition-colors border-b-2 ${activeTab === 'reviews' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
-                                >
-                                    <MessageSquare className="w-4 h-4" /> 나의 리뷰
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('posts')}
-                                    className={`px-6 py-3 text-sm font-bold flex items-center gap-2 transition-colors border-b-2 ${activeTab === 'posts' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
-                                >
-                                    <FileText className="w-4 h-4" /> 나의 게시글
-                                </button>
+                                <div className="flex gap-6 border-b border-[color:var(--mmo-rule)] pb-2">
+                                    <button
+                                        onClick={() => setActiveTab('reviews')}
+                                        className={`text-[11px] uppercase tracking-[0.28em] transition-colors ${
+                                            activeTab === 'reviews'
+                                                ? 'text-[var(--mmo-ink)]'
+                                                : 'text-[var(--mmo-muted)] hover:text-[var(--mmo-ink)]'
+                                        }`}
+                                    >
+                                        나의 리뷰
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab('posts')}
+                                        className={`text-[11px] uppercase tracking-[0.28em] transition-colors ${
+                                            activeTab === 'posts'
+                                                ? 'text-[var(--mmo-ink)]'
+                                                : 'text-[var(--mmo-muted)] hover:text-[var(--mmo-ink)]'
+                                        }`}
+                                    >
+                                        나의 게시글
+                                    </button>
+                                </div>
                             </div>
 
-                            {/* Content */}
-                            <div className="min-h-[200px]">
-                                {activeTab === 'reviews' && (
-                                    <div className="space-y-4">
-                                        {myReviews.length > 0 ? (
-                                            myReviews.map(review => (
-                                                <div
-                                                    key={review.id}
-                                                    onClick={() => navigate(`/songs/${review.songId}`)}
-                                                    className="bg-slate-900/50 p-4 rounded-xl border border-slate-800 hover:border-indigo-500/50 cursor-pointer transition-all flex gap-4 items-center group"
-                                                >
-                                                    <img
-                                                        src={review.songImageUrl || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=2070&auto=format&fit=crop"}
-                                                        alt={review.songTitle}
-                                                        className="w-16 h-16 rounded-lg object-cover group-hover:scale-105 transition-transform"
-                                                    />
-                                                    <div className="flex-1">
-                                                        <h4 className="font-bold text-white group-hover:text-indigo-400 transition-colors">{review.songTitle}</h4>
-                                                        <div className="flex items-center gap-2 mb-1">
-                                                            <div className="flex text-yellow-500">
-                                                                {[...Array(review.rating)].map((_, i) => <Star key={i} className="w-3 h-3 fill-current" />)}
-                                                            </div>
-                                                            <span className="text-xs text-slate-500">{new Date(review.createdAt).toLocaleDateString()}</span>
-                                                        </div>
-                                                        <p className="text-sm text-slate-300 line-clamp-1">{review.comment}</p>
+                            {activeTab === 'reviews' && (
+                                <div className="mt-6 border-b border-[color:var(--mmo-rule)]">
+                                    {myReviews.length > 0 ? (
+                                        myReviews.map((review) => (
+                                            <button
+                                                key={review.id}
+                                                type="button"
+                                                onClick={() => navigate(`/songs/${review.songId}`)}
+                                                className="group grid w-full gap-5 border-t border-[color:var(--mmo-rule)] py-6 text-left transition-colors hover:bg-[rgba(23,19,16,0.03)] lg:grid-cols-[88px_minmax(0,1fr)_130px]"
+                                            >
+                                                <img
+                                                    src={review.songImageUrl || 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=2070&auto=format&fit=crop'}
+                                                    alt={review.songTitle}
+                                                    className="h-[88px] w-[88px] object-cover"
+                                                />
+                                                <div className="min-w-0">
+                                                    <div className="text-[11px] uppercase tracking-[0.28em] text-[var(--mmo-muted)]">
+                                                        Review
                                                     </div>
+                                                    <h3 className="font-display mt-2 truncate text-[1.8rem] leading-[1.06] tracking-[-0.045em] text-[var(--mmo-ink)]">
+                                                        {review.songTitle}
+                                                    </h3>
+                                                    <div className="mt-3 flex flex-wrap items-center gap-2 text-[var(--mmo-accent)]">
+                                                        {[...Array(review.rating)].map((_, index) => (
+                                                            <Star key={index} className="h-4 w-4 fill-current" />
+                                                        ))}
+                                                    </div>
+                                                    <p className="mt-3 text-base leading-8 text-[var(--mmo-muted)]">
+                                                        {truncate(review.comment)}
+                                                    </p>
                                                 </div>
-                                            ))
-                                        ) : (
-                                            <div className="text-center py-10 text-slate-600 flex flex-col items-center">
-                                                <MessageSquare className="w-12 h-12 mb-2 opacity-20" />
-                                                <p>작성한 리뷰가 없습니다.</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
+                                                <div className="flex flex-col items-start gap-3 text-sm leading-7 text-[var(--mmo-muted)] lg:items-end">
+                                                    <span>{formatDate(review.createdAt)}</span>
+                                                    <span className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.28em] transition-colors group-hover:text-[var(--mmo-ink)]">
+                                                        상세 보기
+                                                        <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                                                    </span>
+                                                </div>
+                                            </button>
+                                        ))
+                                    ) : (
+                                        <div className="py-16 text-center text-[var(--mmo-muted)]">
+                                            작성한 리뷰가 없습니다.
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
-                                {activeTab === 'posts' && (
-                                    <div className="space-y-4">
-                                        {myPosts.length > 0 ? (
-                                            myPosts.map(post => (
-                                                <div
-                                                    key={post.id}
-                                                    onClick={() => navigate(`/board/${post.id}`)}
-                                                    className="bg-slate-900/50 p-4 rounded-xl border border-slate-800 hover:border-indigo-500/50 cursor-pointer transition-all flex justify-between items-center group"
-                                                >
-                                                    <div>
-                                                        <div className="flex items-center gap-2 mb-1">
-                                                            <span className="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded">{post.category === 'RECOMMEND' ? '추천' : '자유'}</span>
-                                                            <h4 className="font-bold text-white group-hover:text-indigo-400 transition-colors">{post.title}</h4>
-                                                        </div>
-                                                        <div className="flex items-center gap-3 text-xs text-slate-500">
-                                                            <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {new Date(post.createdAt).toLocaleDateString()}</span>
-                                                            {post.commentCount > 0 && <span className="text-indigo-400">댓글 {post.commentCount}</span>}
-                                                        </div>
+                            {activeTab === 'posts' && (
+                                <div className="mt-6 border-b border-[color:var(--mmo-rule)]">
+                                    {myPosts.length > 0 ? (
+                                        myPosts.map((post) => (
+                                            <button
+                                                key={post.id}
+                                                type="button"
+                                                onClick={() => navigate(`/board/${post.id}`)}
+                                                className="group grid w-full gap-5 border-t border-[color:var(--mmo-rule)] py-6 text-left transition-colors hover:bg-[rgba(23,19,16,0.03)] lg:grid-cols-[160px_minmax(0,1fr)_130px]"
+                                            >
+                                                <div className="text-[11px] uppercase tracking-[0.28em] text-[var(--mmo-muted)]">
+                                                    {post.category === 'RECOMMEND' ? 'Song pick' : 'Free board'}
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <h3 className="font-display text-[1.9rem] leading-[1.06] tracking-[-0.045em] text-[var(--mmo-ink)]">
+                                                        {post.title}
+                                                    </h3>
+                                                    <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-[var(--mmo-muted)]">
+                                                        <span className="inline-flex items-center gap-1.5">
+                                                            <Calendar className="h-4 w-4" />
+                                                            {formatDate(post.createdAt)}
+                                                        </span>
+                                                        <span className="inline-flex items-center gap-1.5">
+                                                            <MessageSquare className="h-4 w-4" />
+                                                            댓글 {post.commentCount || 0}
+                                                        </span>
                                                     </div>
                                                 </div>
-                                            ))
-                                        ) : (
-                                            <div className="text-center py-10 text-slate-600 flex flex-col items-center">
-                                                <FileText className="w-12 h-12 mb-2 opacity-20" />
-                                                <p>작성한 게시글이 없습니다.</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
+                                                <div className="flex items-start text-[11px] uppercase tracking-[0.28em] text-[var(--mmo-muted)] lg:justify-end">
+                                                    <span className="inline-flex items-center gap-2 transition-colors group-hover:text-[var(--mmo-ink)]">
+                                                        상세 보기
+                                                        <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                                                    </span>
+                                                </div>
+                                            </button>
+                                        ))
+                                    ) : (
+                                        <div className="py-16 text-center text-[var(--mmo-muted)]">
+                                            작성한 게시글이 없습니다.
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </section>
+                    </section>
                 </div>
             </div>
         </div>
